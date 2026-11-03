@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="ja" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ネットミームタイピング2026</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Inter"', '"Hiragino Sans"', '"Hiragino Kaku Gothic ProN"', '"Meiryo"', 'sans-serif'],
+                        mono: ['"Fira Code"', '"JetBrains Mono"', 'Consolas', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tone.js for Sound Effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        /* Custom scrollbar and glassmorphism */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+        ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.3); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(56, 189, 248, 0.6); }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .light .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        /* Key stroke visual effect */
+        .key-cap {
+            transition: all 0.08s ease;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.3);
+        }
+        .key-cap.active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 rgba(0,0,0,0.3);
+        }
+
+        /* Pulsing cursor animation */
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        .typing-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.2em;
+            background-color: #38bdf8;
+            vertical-align: middle;
+            animation: blink 0.9s infinite;
+        }
+
+        /* Shake animation on error */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .shake-err {
+            animation: shake 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased transition-colors duration-300 select-none overflow-x-hidden flex flex-col justify-between">
+
+    <!-- Navbar / Header -->
+    <header class="w-full max-w-6xl mx-auto p-4 sm:p-6 flex justify-between items-center z-10">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-sky-500/20">
+                <i class="fa-solid font-mono text-xl">26</i>
+            </div>
+            <div>
+                <h1 class="text-lg sm:text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-indigo-300">
+                    ネットミームタイピング2026
+                </h1>
+                <p class="text-xs text-slate-400">今年のネットミーム あなたはいくつ知っている？</p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <!-- Audio Toggle -->
+            <button id="soundToggleBtn" class="p-2.5 rounded-xl glass-panel text-slate-300 hover:text-white hover:bg-slate-800/80 transition-all" title="音量を切替">
+                <i id="soundIcon" class="fa-solid fa-volume-high text-lg"></i>
+            </button>
+            <!-- Theme Toggle -->
+            <button id="themeToggleBtn" class="p-2.5 rounded-xl glass-panel text-slate-300 hover:text-white hover:bg-slate-800/80 transition-all" title="テーマ切り替え">
+                <i id="themeIcon" class="fa-solid fa-moon text-lg"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="w-full max-w-4xl mx-auto px-4 py-2 flex-grow flex flex-col justify-center">
+
+        <!-- Controls / Selectors -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+            <!-- Category Selector -->
+            <div class="glass-panel p-3 rounded-2xl flex items-center space-x-3">
+                <i class="fa-solid fa-list-check text-sky-400 ml-2"></i>
+                <div class="flex-grow">
+                    <label class="block text-xs text-slate-400 font-medium">カテゴリー</label>
+                    <span class="block text-sm font-semibold text-slate-100">ネットミーム2026</span>
+                </div>
+            </div>
+
+            <!-- Mode/Timer Setting -->
+            <div class="glass-panel p-3 rounded-2xl flex items-center justify-between px-4">
+                <div class="flex items-center space-x-3">
+                    <i class="fa-solid fa-stopwatch text-indigo-400"></i>
+                    <div>
+                        <span class="block text-xs text-slate-400 font-medium">モード</span>
+                        <span id="modeDisplay" class="text-sm font-semibold text-slate-100">全10問完走</span>
+                    </div>
+                </div>
+                <button id="restartBtn" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-slate-300 hover:text-white transition-all flex items-center space-x-1">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>やり直す</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Live Metrics Bar -->
+        <div class="grid grid-cols-4 gap-2 sm:gap-4 mb-6">
+            <div class="glass-panel p-3 rounded-2xl text-center">
+                <span class="text-xs text-slate-400 block mb-1"><i class="fa-solid fa-gauge-high text-sky-400 mr-1"></i>CPM</span>
+                <span id="cpmVal" class="text-xl sm:text-2xl font-bold font-mono text-sky-400">0</span>
+            </div>
+            <div class="glass-panel p-3 rounded-2xl text-center">
+                <span class="text-xs text-slate-400 block mb-1"><i class="fa-solid fa-bullseye text-emerald-400 mr-1"></i>正確率</span>
+                <span id="accuracyVal" class="text-xl sm:text-2xl font-bold font-mono text-emerald-400">100<span class="text-xs">%</span></span>
+            </div>
+            <div class="glass-panel p-3 rounded-2xl text-center">
+                <span class="text-xs text-slate-400 block mb-1"><i class="fa-solid fa-triangle-exclamation text-rose-400 mr-1"></i>ミス</span>
+                <span id="errorVal" class="text-xl sm:text-2xl font-bold font-mono text-rose-400">0</span>
+            </div>
+            <div class="glass-panel p-3 rounded-2xl text-center">
+                <span class="text-xs text-slate-400 block mb-1"><i class="fa-regular fa-clock text-indigo-400 mr-1"></i>タイム</span>
+                <span id="timerVal" class="text-xl sm:text-2xl font-bold font-mono text-indigo-400">0.0<span class="text-xs">s</span></span>
+            </div>
+        </div>
+
+        <!-- Typing Main Card -->
+        <div id="typingCard" class="glass-panel p-6 sm:p-10 rounded-3xl relative overflow-hidden transition-all duration-200 border-2 border-slate-700/50 shadow-2xl">
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-800/80 rounded-full h-1.5 mb-8 overflow-hidden">
+                <div id="progressBar" class="bg-gradient-to-r from-sky-400 to-indigo-500 h-1.5 rounded-full transition-all duration-300" style="width: 10%"></div>
+            </div>
+
+            <!-- Start Overlay (when waiting for first keypress) -->
+            <div id="startPrompt" class="absolute inset-0 bg-slate-950/80 backdrop-blur-md flex flex-col items-center justify-center z-20 transition-opacity duration-300">
+                <div id="startPromptContent" class="flex flex-col items-center">
+                    <div class="w-16 h-16 rounded-full bg-sky-500/20 text-sky-400 border border-sky-500/40 flex items-center justify-center text-2xl mb-4 animate-bounce">
+                        <i class="fa-solid fa-keyboard"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white mb-2">スペースキー または 任意のキーでスタート</h2>
+                    <p class="text-sm text-slate-400">入力は自動的にローマ字変換され判定されます</p>
+                </div>
+                <div id="countdownDisplay" class="hidden text-7xl font-black font-mono text-sky-400" aria-live="assertive"></div>
+            </div>
+
+            <!-- Japanese Target Text (Kanji / Kana) -->
+            <div class="mb-4 text-center">
+                <p id="targetKanji" class="text-2xl sm:text-4xl font-bold tracking-wide text-slate-100 min-h-[3rem] whitespace-pre-line">
+                    <!-- Dynamic Kanji -->
+                </p>
+            </div>
+
+            <!-- Kana Reading -->
+            <div class="mb-6 text-center">
+                <p id="targetKana" class="text-lg sm:text-xl font-medium text-slate-400 min-h-[2rem] tracking-widest">
+                    <!-- Dynamic Kana -->
+                </p>
+            </div>
+
+            <hr class="border-slate-800 my-6">
+
+            <!-- Romaji Typing Area -->
+            <div class="bg-slate-950/60 rounded-2xl p-4 sm:p-6 text-center border border-slate-800 shadow-inner">
+                <div id="romajiDisplay" class="font-mono text-xl sm:text-3xl tracking-widest leading-relaxed break-all uppercase">
+                    <!-- Romaji Spans inserted via JS -->
+                </div>
+            </div>
+
+            <!-- Status Message / Help -->
+            <div class="mt-4 flex justify-between items-center text-xs text-slate-500">
+                <span id="questionCount">Question 1 / 10</span>
+                <span><i class="fa-solid fa-circle-info mr-1"></i>Esc キーでリセット</span>
+            </div>
+        </div>
+
+        <!-- On-Screen Keyboard Visualizer (Optional/Interactive) -->
+        <div class="mt-6 glass-panel p-4 rounded-2xl hidden md:block">
+            <div id="virtualKeyboard" class="flex flex-col gap-1.5 max-w-2xl mx-auto">
+                <!-- Keyboard Rows populated by JS -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full max-w-6xl mx-auto p-4 text-center text-xs text-slate-500">
+        ネットミームタイピング2026
+    </footer>
+
+    <!-- Result Modal -->
+    <div id="resultModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-lg flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="glass-panel border-2 border-slate-700 max-w-md w-full rounded-3xl p-6 sm:p-8 text-center shadow-2xl transform scale-95 transition-transform duration-300" id="resultModalCard">
+            <!-- Rank Badge -->
+            <div class="relative inline-block mb-4">
+                <div id="rankBadge" class="w-24 h-24 rounded-full bg-gradient-to-tr from-amber-400 to-amber-600 text-slate-950 font-black text-5xl flex items-center justify-center shadow-xl shadow-amber-500/20 mx-auto">
+                    S
+                </div>
+            </div>
+
+            <h2 class="text-2xl font-bold text-white mb-1">タイピング結果</h2>
+            <p id="rankTitle" class="text-sm font-semibold text-amber-400 mb-6">神速のタイピスト</p>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-2 gap-3 mb-6 bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+                <div class="text-left">
+                    <span class="text-xs text-slate-400 block">打字速度 (CPM)</span>
+                    <span id="finalCpm" class="text-2xl font-mono font-bold text-sky-400">320</span>
+                </div>
+                <div class="text-left">
+                    <span class="text-xs text-slate-400 block">正確率</span>
+                    <span id="finalAccuracy" class="text-2xl font-mono font-bold text-emerald-400">98.5%</span>
+                </div>
+                <div class="text-left">
+                    <span class="text-xs text-slate-400 block">クリアタイム</span>
+                    <span id="finalTime" class="text-2xl font-mono font-bold text-indigo-400">42.5s</span>
+                </div>
+                <div class="text-left">
+                    <span class="text-xs text-slate-400 block">ミス入力</span>
+                    <span id="finalErrors" class="text-2xl font-mono font-bold text-rose-400">2 回</span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex gap-3">
+                <button id="retryBtn" class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-sky-500/25 transition-all">
+                    <i class="fa-solid fa-rotate-right mr-2"></i>もう一度挑戦
+                </button>
+                <button id="shareBtn" class="py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-sm transition-all">
+                    <i class="fa-brands fa-x-twitter text-base"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        /**
+         * TEXT DATASETS
+         */
+        const DATASETS = {
+            meme: [
+                { kanji: "好きすぎて滅", kana: "すきすぎてめつ"},
+                { kanji: "ｳﾜｱｱｱｱ!ｽﾋﾟｷﾓﾘﾁｬﾊﾞﾀﾞﾝｷﾞｼﾞﾏｾﾖ!ﾈﾙﾇﾆﾛｯｹﾎﾟﾝﾆｮｸﾁｮｷﾞﾝﾖｯｶﾘｱﾆﾗﾝﾏﾘｴﾖ～～!!", kana: "いたた！すぴっきーのかみをひっぱらないでください！ねるはこんなぼうりょくてきなきゃらじゃありません！" },
+                { kanji: "これ毒かも！間に合え！間に合え！", kana: "これどくかも！まにあえ！まにあえ！" },
+                { kanji: "キュウリ植えてもいいですか？", kana: "きゅうりうえてもいいですか？"},
+                { kanji: "アッチ側に立つんわ俺や！！！", kana: "あっちがわにたつんわおれや！！！"},
+                { kanji: "ドパガキ", kana: "どぱがき"},
+                { kanji: "トリッカルをサービス終了させてあげる。", kana: "とりっかるをさーびすしゅうりょうさせてあげる。"},
+                { kanji: "人の心とかないんか？", kana: "ひとのこころとかないんか？"},
+                { kanji: "言わないでしょそんな事ッ", kana: "いわないでしょそんなこと"},
+                { kanji: "簡単ッッ！！簡単ッッッ！！！", kana: "かんたん！！かんたん！！！"},
+                { kanji: "腹が減りすぎてちょっと具合が悪いんだよォーーッ", kana: "はらがへりすぎてちょっとぐあいがわるいんだよぉー"},
+                { kanji: "変な歌やめてッ", kana: "へんなうたやめて"},
+                { kanji: "ONITYA", kana: "おもしろいむぎちゃ"},
+                { kanji: "ギルティ炭酸NOPE", kana: "ぎるてぃたんさんのーぷ"},
+                { kanji: "ここから100歩離れた丘に友達が暮らしてます！", kana: "ここからひゃっぽはなれたおかにともだちがくらしてます"},
+                { kanji: "私に嘘はつかないでー！", kana: "わたしにうそはつかないでー！"},
+                { kanji: "ここに集まっていたんだね", kana:"ここにあつまっていたんだね"},
+                { kanji: "ガチガチのパン", kana: "がちがちのぱん"},
+                { kanji: "めっちゃカメレオン", kana: "めっちゃかめれおん"},
+                { kanji: "トモダチコレクション わくわく生活", kana: "ともだちこれくしょんわくわくせいかつ"},
+                { kanji: "ゼルダの伝説 時のオカリナ", kana: "ぜるだのでんせつときのおかりな"},
+                { kanji: "ぽこあポケモン", kana: "ぽこあぽけもん"},
+                { kanji: "私の演技がきちんと伝わりますよ\nうに。", kana: "わたしのえんぎがきちんとつたわりますように。"},
+                { kanji: "今日はもう終わったよ!!", kana: "きょうはもうおわったよ"},
+                { kanji: "イーヤーヤダヤダ", kana: "いーやーやだやだ"},
+                { kanji: "ウーラーヤハヤハ", kana: "うーらーやはやは"}
+
+        ]
+        };
+    
+        /**
+         * ROMAJI MAPPING TABLE (Kana to dynamic flexible Romaji nodes)
+         */
+        const ROMAJI_MAP = {
+            'あ':['a'], 'い':['i'], 'う':['u'], 'え':['e'], 'お':['o'],
+            'か':['ka'], 'き':['ki'], 'く':['ku'], 'け':['ke'], 'こ':['ko'],
+            'さ':['sa'], 'し':['shi','si'], 'す':['su'], 'せ':['se'], 'そ':['so'],
+            'た':['ta'], 'ち':['chi','ti'], 'つ':['tsu','tu'], 'て':['te'], 'と':['to'],
+            'な':['na'], 'に':['ni'], 'ぬ':['nu'], 'ね':['ne'], 'の':['no'],
+            'は':['ha'], 'ひ':['hi'], 'ふ':['fu','hu'], 'へ':['he'], 'ほ':['ho'],
+            'ま':['ma'], 'み':['mi'], 'む':['mu'], 'め':['me'], 'も':['mo'],
+            'や':['ya'], 'ゆ':['yu'], 'よ':['yo'],
+            'ら':['ra'], 'り':['ri'], 'る':['ru'], 'れ':['re'], 'ろ':['ro'],
+            'わ':['wa'], 'を':['wo'], 'ん':['nn','n','xn'],
+            'が':['ga'], 'ぎ':['gi'], 'ぐ':['gu'], 'げ':['ge'], 'ご':['go'],
+            'ざ':['za'], 'じ':['ji','zi'], 'ず':['zu'], 'ぜ':['ze'], 'ぞ':['zo'],
+            'だ':['da'], 'ぢ':['di'], 'づ':['du'], 'で':['de'], 'ど':['do'],
+            'ば':['ba'], 'び':['bi'], 'ぶ':['bu'], 'べ':['be'], 'ぼ':['bo'],
+            'ぱ':['pa'], 'ぴ':['pi'], 'ぷ':['pu'], 'ぺ':['pe'], 'ぽ':['po'],
+            'ゔ':['vu'],
+            'きゃ':['kya'], 'きゅ':['kyu'], 'きょ':['kyo'],
+            'しゃ':['sha','sya'], 'しゅ':['shu','syu'], 'しょ':['sho','syo'],
+            'ちゃ':['cha','tya'], 'ちゅ':['chu','tyu'], 'ちょ':['cho','tyo'],
+            'ふぁ':['fa'], 'ふぃ':['fi'], 'ふぇ':['fe'], 'ふぉ':['fo'], 'ふゅ':['fyu'],
+            'うぃ':['wi'], 'うぇ':['we'], 'うぉ':['who'],
+            'てぃ':['thi'], 'でぃ':['dhi'], 'とぅ':['twu'], 'どぅ':['dwu'],
+            'つぁ':['tsa'], 'つぃ':['tsi'], 'つぇ':['tse'], 'つぉ':['tso'],
+            'しぇ':['she'], 'じぇ':['je'],
+            'ゔぁ':['va'], 'ゔぃ':['vi'], 'ゔぇ':['ve'], 'ゔぉ':['vo'],
+            'にゃ':['nya'], 'にゅ':['nyu'], 'にょ':['nyo'],
+            'ひゃ':['hya'], 'ひゅ':['hyu'], 'ひょ':['hyo'],
+            'みゃ':['mya'], 'みゅ':['myu'], 'みょ':['myo'],
+            'りゃ':['rya'], 'りゅ':['ryu'], 'りょ':['ryo'],
+            'ぎゃ':['gya'], 'ぎゅ':['gyu'], 'ぎょ':['gyo'],
+            'じゃ':['ja','jya','zya'], 'じゅ':['ju','jyu','zyu'], 'じょ':['jo','jyo','zyo'],
+            'びゃ':['bya'], 'びゅ':['byu'], 'びょ':['byo'],
+            'ぴゃ':['pya'], 'ぴゅ':['pyu'], 'ぴょ':['pyo'],
+            'っ':['xtu','tsu','ltsu','ltu','tu'], // Small tsu dynamic handling included in parser
+            'ぁ':['a'], 'ぃ':['i'], 'ぅ':['u'], 'ぇ':['e'], 'ぉ':['o'],
+            'ー':['-'], '、':[','], '。':['.'], '！':['!'], '？':['?'], ' ':[' ']
+        };
+
+        /**
+         * AUDIO ENGINE (Tone.js wrapper)
+         */
+        class SoundController {
+            constructor() {
+                this.enabled = true;
+                this.synth = null;
+                this.init();
+            }
+
+            init() {
+                try {
+                    this.synth = new Tone.PolySynth(Tone.Synth, {
+                        oscillator: { type: "triangle" },
+                        envelope: { attack: 0.005, decay: 0.1, sustain: 0.0, release: 0.1 }
+                    }).toDestination();
+                    this.synth.volume.value = -12;
+                } catch(e) {
+                    console.log("Audio init deferred");
+                }
+            }
+
+            playKeySound() {
+                if (!this.enabled) return;
+                try {
+                    Tone.start();
+                    this.synth.triggerAttackRelease("C5", "32n");
+                } catch(e){}
+            }
+
+            playErrorSound() {
+                if (!this.enabled) return;
+                try {
+                    Tone.start();
+                    this.synth.triggerAttackRelease("A2", "16n");
+                } catch(e){}
+            }
+
+            playCompleteSound() {
+                if (!this.enabled) return;
+                try {
+                    Tone.start();
+                    const now = Tone.now();
+                    this.synth.triggerAttackRelease("C5", "16n", now);
+                    this.synth.triggerAttackRelease("E5", "16n", now + 0.08);
+                    this.synth.triggerAttackRelease("G5", "16n", now + 0.16);
+                    this.synth.triggerAttackRelease("C6", "8n", now + 0.24);
+                } catch(e){}
+            }
+        }
+
+        const sounds = new SoundController();
+
+        /**
+         * KANA TO ROMAJI CONVERTER LOGIC
+         * Parses kana into target nodes capable of matching multiple valid Romaji typing styles.
+         */
+        function parseKanaToRomajiNodes(kanaStr) {
+            kanaStr = Array.from(kanaStr.normalize("NFKC"), char => {
+                const code = char.charCodeAt(0);
+                return code >= 0x30A1 && code <= 0x30F6
+                    ? String.fromCharCode(code - 0x60)
+                    : char;
+            }).join("");
+
+            let nodes = [];
+            let i = 0;
+
+            while (i < kanaStr.length) {
+                // Check compound 2-char kana (e.g. しゃ, きゅ)
+                if (i + 1 < kanaStr.length) {
+                    let pair = kanaStr.substring(i, i + 2);
+                    if (ROMAJI_MAP[pair]) {
+                        nodes.push({ kana: pair, options: [...ROMAJI_MAP[pair]] });
+                        i += 2;
+                        continue;
+                    }
+                }
+
+                let single = kanaStr[i];
+
+                // Handle Sokuon (っ) specially based on following character
+                if (single === 'っ' && i + 1 < kanaStr.length) {
+                    let nextKana = kanaStr[i + 1];
+                    let nextOptions = ROMAJI_MAP[nextKana] || [];
+                    if (nextKana === 'しゃ' || nextKana === 'しゅ' || nextKana === 'しょ') nextOptions = ROMAJI_MAP[nextKana];
+
+                    let sokuonConsonants = [];
+                    if (nextOptions.length > 0) {
+                        nextOptions.forEach(opt => {
+                            sokuonConsonants.push(opt[0]); // first letter repeats
+                        });
+                    }
+                    // Default fallback options for 'っ'
+                    sokuonConsonants.push('xtu', 'ltu');
+
+                    nodes.push({ kana: 'っ', options: Array.from(new Set(sokuonConsonants)) });
+                    i++;
+                    continue;
+                }
+
+                if (ROMAJI_MAP[single]) {
+                    nodes.push({ kana: single, options: [...ROMAJI_MAP[single]] });
+                } else {
+                    // Alphabet / numbers fallback
+                    nodes.push({ kana: single, options: [single.toLowerCase()] });
+                }
+                i++;
+            }
+
+            return nodes;
+        }
+
+        /**
+         * GAME STATE & LOGIC
+         */
+        class TypingGame {
+            constructor() {
+                this.questions = [];
+                this.currentIndex = 0;
+                this.isStarted = false;
+                this.isFinished = false;
+
+                // Typing tracking state
+                this.kanaNodes = [];
+                this.nodeIndex = 0;
+                this.targetRomaji = "";
+                this.typedInCurrentNode = "";
+
+                // Display tracking string
+                this.completedRomaji = "";
+                this.remainingRomaji = "";
+
+                // Stats
+                this.totalKeystrokes = 0;
+                this.correctKeystrokes = 0;
+                this.errors = 0;
+                this.startTime = null;
+                this.timerInterval = null;
+                this.countdownTimeout = null;
+                this.isCountdown = false;
+
+                // DOM Elements
+                this.initDOMElements();
+                this.setupVirtualKeyboard();
+                this.bindEvents();
+                this.loadCategory();
+            }
+
+            initDOMElements() {
+                this.targetKanjiEl = document.getElementById("targetKanji");
+                this.targetKanaEl = document.getElementById("targetKana");
+                this.romajiDisplayEl = document.getElementById("romajiDisplay");
+                this.startPromptEl = document.getElementById("startPrompt");
+                this.startPromptContentEl = document.getElementById("startPromptContent");
+                this.countdownDisplayEl = document.getElementById("countdownDisplay");
+                this.typingCardEl = document.getElementById("typingCard");
+                this.progressBarEl = document.getElementById("progressBar");
+
+                this.cpmValEl = document.getElementById("cpmVal");
+                this.accuracyValEl = document.getElementById("accuracyVal");
+                this.errorValEl = document.getElementById("errorVal");
+                this.timerValEl = document.getElementById("timerVal");
+                this.questionCountEl = document.getElementById("questionCount");
+
+                this.restartBtn = document.getElementById("restartBtn");
+                this.soundToggleBtn = document.getElementById("soundToggleBtn");
+                this.themeToggleBtn = document.getElementById("themeToggleBtn");
+
+                this.resultModal = document.getElementById("resultModal");
+                this.resultCard = document.getElementById("resultModalCard");
+                this.retryBtn = document.getElementById("retryBtn");
+                this.shareBtn = document.getElementById("shareBtn");
+            }
+
+            loadCategory() {
+                this.shuffleQuestions();
+                this.resetGame();
+            }
+
+            shuffleQuestions() {
+                const dataset = DATASETS.meme;
+                const shuffled = [...dataset];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const randomIndex = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[i]];
+                }
+                this.questions = shuffled.slice(0, 10);
+            }
+
+            restartGame() {
+                this.shuffleQuestions();
+                this.resetGame();
+            }
+
+            resetGame() {
+                clearInterval(this.timerInterval);
+                clearTimeout(this.countdownTimeout);
+                this.countdownTimeout = null;
+                this.currentIndex = 0;
+                this.isStarted = false;
+                this.isCountdown = false;
+                this.isFinished = false;
+
+                this.totalKeystrokes = 0;
+                this.correctKeystrokes = 0;
+                this.errors = 0;
+                this.startTime = null;
+
+                this.cpmValEl.textContent = "0";
+                this.accuracyValEl.textContent = "100%";
+                this.errorValEl.textContent = "0";
+                this.timerValEl.textContent = "0.0s";
+                this.progressBarEl.style.width = "0%";
+
+                this.startPromptContentEl.classList.remove("hidden");
+                this.countdownDisplayEl.classList.add("hidden");
+                this.countdownDisplayEl.textContent = "";
+                this.startPromptEl.classList.remove("opacity-0", "pointer-events-none");
+                this.hideResultModal();
+
+                this.setupCurrentQuestion();
+            }
+
+            setupCurrentQuestion() {
+                if (this.currentIndex >= this.questions.length) {
+                    this.finishGame();
+                    return;
+                }
+
+                const current = this.questions[this.currentIndex];
+                this.targetKanjiEl.textContent = current.kanji;
+                this.targetKanaEl.textContent = current.kana;
+
+                this.kanaNodes = parseKanaToRomajiNodes(current.kana);
+                this.nodeIndex = 0;
+                this.typedInCurrentNode = "";
+                this.completedRomaji = "";
+
+                this.questionCountEl.textContent = `Question ${this.currentIndex + 1} / ${this.questions.length}`;
+                this.updateProgressBar();
+                this.renderRomajiDisplay();
+            }
+
+            renderRomajiDisplay() {
+                if (this.nodeIndex >= this.kanaNodes.length) return;
+
+                const currentNode = this.kanaNodes[this.nodeIndex];
+                // Select default display option (first available option)
+                const defaultCurrentOption = currentNode.options[0];
+                const uncompletedInNode = defaultCurrentOption.substring(this.typedInCurrentNode.length);
+
+                let upcomingRomaji = "";
+                for (let i = this.nodeIndex + 1; i < this.kanaNodes.length; i++) {
+                    upcomingRomaji += this.kanaNodes[i].options[0];
+                }
+
+                // Construct styled Romaji string
+                this.romajiDisplayEl.innerHTML = `
+                    <span class="text-sky-400 font-semibold">${this.escapeHTML(this.completedRomaji)}</span><span class="bg-sky-500/20 text-sky-200 border-b-2 border-sky-400 font-bold">${this.escapeHTML(this.typedInCurrentNode)}</span><span class="typing-cursor"></span><span class="text-slate-400">${this.escapeHTML(uncompletedInNode)}</span><span class="text-slate-600">${this.escapeHTML(upcomingRomaji)}</span>
+                `;
+            }
+
+            escapeHTML(str) {
+                return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            }
+
+            handleKeyPress(key) {
+                if (this.isFinished) return;
+
+                if (!this.isStarted) {
+                    if (!this.isCountdown) this.startCountdown();
+                    return;
+                }
+
+                // Visual key press on virtual keyboard
+                this.animateVirtualKey(key);
+
+                const currentNode = this.kanaNodes[this.nodeIndex];
+                const inputChar = key.toLowerCase();
+
+                // Check match against options in current node
+                let matched = false;
+                let matchedOption = null;
+
+                for (let opt of currentNode.options) {
+                    if (opt.startsWith(this.typedInCurrentNode + inputChar)) {
+                        matched = true;
+                        matchedOption = opt;
+                        break;
+                    }
+                }
+
+                this.totalKeystrokes++;
+
+                if (matched) {
+                    sounds.playKeySound();
+                    this.correctKeystrokes++;
+                    this.typedInCurrentNode += inputChar;
+
+                    // If full option matched
+                    if (this.typedInCurrentNode === matchedOption) {
+                        this.completedRomaji += matchedOption;
+                        this.typedInCurrentNode = "";
+                        this.nodeIndex++;
+
+                        if (this.nodeIndex >= this.kanaNodes.length) {
+                            // Question finished
+                            sounds.playKeySound();
+                            this.currentIndex++;
+                            setTimeout(() => this.setupCurrentQuestion(), 60);
+                            return;
+                        }
+                    }
+                } else {
+                    // Mistake made
+                    sounds.playErrorSound();
+                    this.errors++;
+                    this.triggerErrorAnimation();
+                }
+
+                this.updateMetrics();
+                this.renderRomajiDisplay();
+            }
+
+            startCountdown() {
+                this.isCountdown = true;
+                this.startPromptContentEl.classList.add("hidden");
+                this.countdownDisplayEl.classList.remove("hidden");
+                this.countdownDisplayEl.textContent = "3";
+
+                const steps = ["2", "1", "START"];
+                const showStep = (index) => {
+                    if (index < steps.length) {
+                        this.countdownDisplayEl.textContent = steps[index];
+                        this.countdownTimeout = setTimeout(() => showStep(index + 1), 1000);
+                        return;
+                    }
+
+                    this.startPromptEl.classList.add("opacity-0", "pointer-events-none");
+                    this.countdownTimeout = setTimeout(() => {
+                        this.countdownDisplayEl.classList.add("hidden");
+                        this.isCountdown = false;
+                        this.isStarted = true;
+                        this.startTime = Date.now();
+                        this.startTimer();
+                    }, 300);
+                };
+
+                this.countdownTimeout = setTimeout(() => showStep(0), 1000);
+            }
+
+            triggerErrorAnimation() {
+                this.typingCardEl.classList.add("shake-err", "border-rose-500/50");
+                setTimeout(() => {
+                    this.typingCardEl.classList.remove("shake-err", "border-rose-500/50");
+                }, 300);
+            }
+
+            startTimer() {
+                this.timerInterval = setInterval(() => {
+                    if (!this.startTime) return;
+                    const elapsedSec = (Date.now() - this.startTime) / 1000;
+                    this.timerValEl.innerHTML = `${elapsedSec.toFixed(1)}<span class="text-xs">s</span>`;
+                    this.updateMetrics();
+                }, 100);
+            }
+
+            updateMetrics() {
+                if (!this.startTime) return;
+                const elapsedMin = (Date.now() - this.startTime) / 60000;
+                
+                // CPM (Characters Per Minute)
+                const cpm = elapsedMin > 0 ? Math.round(this.correctKeystrokes / elapsedMin) : 0;
+                this.cpmValEl.textContent = cpm;
+
+                // Accuracy
+                const acc = this.totalKeystrokes > 0 
+                    ? Math.max(0, Math.round((this.correctKeystrokes / this.totalKeystrokes) * 100)) 
+                    : 100;
+                this.accuracyValEl.innerHTML = `${acc}<span class="text-xs">%</span>`;
+
+                // Errors
+                this.errorValEl.textContent = this.errors;
+            }
+
+            updateProgressBar() {
+                const percent = ((this.currentIndex) / this.questions.length) * 100;
+                this.progressBarEl.style.width = `${percent}%`;
+            }
+
+            finishGame() {
+                clearInterval(this.timerInterval);
+                this.isFinished = true;
+                this.progressBarEl.style.width = "100%";
+                sounds.playCompleteSound();
+
+                // Trigger Confetti
+                if (typeof confetti === 'function') {
+                    confetti({
+                        particleCount: 80,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+                }
+
+                this.showResultModal();
+            }
+
+            showResultModal() {
+                const elapsedSec = ((Date.now() - this.startTime) / 1000).toFixed(1);
+                const elapsedMin = (Date.now() - this.startTime) / 60000;
+                const cpm = elapsedMin > 0 ? Math.round(this.correctKeystrokes / elapsedMin) : 0;
+                const acc = this.totalKeystrokes > 0 
+                    ? ((this.correctKeystrokes / this.totalKeystrokes) * 100).toFixed(1) 
+                    : "100.0";
+
+                document.getElementById("finalCpm").textContent = cpm;
+                document.getElementById("finalAccuracy").textContent = `${acc}%`;
+                document.getElementById("finalTime").textContent = `${elapsedSec}s`;
+                document.getElementById("finalErrors").textContent = `${this.errors} 回`;
+
+                // Rank Calculation
+                let rank = "C";
+                let rankTitle = "ビギナータイピスト";
+                let badgeClass = "from-slate-400 to-slate-600";
+
+                if (cpm >= 300 && acc >= 90) {
+                    rank = "S";
+                    rankTitle = "神速のタイピングマスター";
+                    badgeClass = "from-amber-400 to-amber-600";
+                } else if (cpm >= 250 && acc >= 90) {
+                    rank = "A";
+                    rankTitle = "上級タイピスト";
+                    badgeClass = "from-sky-400 to-indigo-600";
+                } else if (cpm >= 150 && acc >= 85) {
+                    rank = "B";
+                    rankTitle = "中級タイピスト";
+                    badgeClass = "from-emerald-400 to-teal-600";
+                }
+
+                const rankBadgeNode = document.getElementById("rankBadge");
+                rankBadgeNode.textContent = rank;
+                rankBadgeNode.className = `w-24 h-24 rounded-full bg-gradient-to-tr ${badgeClass} text-slate-950 font-black text-5xl flex items-center justify-center shadow-xl mx-auto`;
+                document.getElementById("rankTitle").textContent = rankTitle;
+
+                this.resultModal.classList.remove("opacity-0", "pointer-events-none");
+                this.resultCard.classList.remove("scale-95");
+                this.resultCard.classList.add("scale-100");
+            }
+
+            hideResultModal() {
+                this.resultModal.classList.add("opacity-0", "pointer-events-none");
+                this.resultCard.classList.remove("scale-100");
+                this.resultCard.classList.add("scale-95");
+            }
+
+            setupVirtualKeyboard() {
+                const keyboardEl = document.getElementById("virtualKeyboard");
+                const rows = [
+                    ["q","w","e","r","t","y","u","i","o","p"],
+                    ["a","s","d","f","g","h","j","k","l"],
+                    ["z","x","c","v","b","n","m","-"]
+                ];
+
+                keyboardEl.innerHTML = "";
+                rows.forEach(row => {
+                    const rowDiv = document.createElement("div");
+                    rowDiv.className = "flex justify-center gap-1 sm:gap-1.5";
+                    row.forEach(key => {
+                        const keyCap = document.createElement("div");
+                        keyCap.dataset.key = key;
+                        keyCap.className = "key-cap w-8 h-9 sm:w-10 sm:h-10 bg-slate-800/90 border border-slate-700/80 rounded-lg flex items-center justify-center text-xs sm:text-sm font-mono font-semibold text-slate-300 uppercase select-none";
+                        keyCap.textContent = key;
+                        rowDiv.appendChild(keyCap);
+                    });
+                    keyboardEl.appendChild(rowDiv);
+                });
+            }
+
+            animateVirtualKey(key) {
+                const keyNode = document.querySelector(`.key-cap[data-key="${key.toLowerCase()}"]`);
+                if (keyNode) {
+                    keyNode.classList.add("active", "bg-sky-500", "text-white");
+                    setTimeout(() => {
+                        keyNode.classList.remove("active", "bg-sky-500", "text-white");
+                    }, 120);
+                }
+            }
+
+            bindEvents() {
+                // Keyboard Input
+                window.addEventListener("keydown", (e) => {
+                    if (e.key === "Escape") {
+                        this.restartGame();
+                        return;
+                    }
+
+                    // Ignore control key combinations
+                    if (e.ctrlKey || e.altKey || e.metaKey) return;
+
+                    // Space or Single Printable Characters
+                    if (e.key === " " || (e.key.length === 1 && e.key.match(/[a-zA-Z0-9\-\,\.\!\?]/))) {
+                        e.preventDefault();
+                        this.handleKeyPress(e.key);
+                    }
+                });
+
+                // Controls
+                this.restartBtn.addEventListener("click", () => this.restartGame());
+                this.retryBtn.addEventListener("click", () => this.restartGame());
+
+                // Sound Toggle
+                this.soundToggleBtn.addEventListener("click", () => {
+                    sounds.enabled = !sounds.enabled;
+                    const icon = document.getElementById("soundIcon");
+                    icon.className = sounds.enabled ? "fa-solid fa-volume-high text-lg" : "fa-solid fa-volume-xmark text-lg text-slate-500";
+                });
+
+                // Theme Toggle
+                this.themeToggleBtn.addEventListener("click", () => {
+                    document.documentElement.classList.toggle("dark");
+                    document.documentElement.classList.toggle("light");
+                    const icon = document.getElementById("themeIcon");
+                    const isDark = document.documentElement.classList.contains("dark");
+                    icon.className = isDark ? "fa-solid fa-moon text-lg" : "fa-solid fa-sun text-lg text-amber-400";
+                });
+
+                // Share Result
+                this.shareBtn.addEventListener("click", () => {
+                    const cpm = document.getElementById("finalCpm").textContent;
+                    const acc = document.getElementById("finalAccuracy").textContent;
+                    const text = `ネットミームタイピング2026の結果: スピード ${cpm} CPM | 正確率 ${acc}! #ネットミームタイピング2026 #タイピング`;
+                    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+                    window.open(url, '_blank');
+                });
+            }
+        }
+
+        // Initialize App on DOM Ready
+        window.onload = () => {
+            window.gameInstance = new TypingGame();
+        };
+    </script>
+</body>
+</html>
