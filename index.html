@@ -89,6 +89,31 @@
         .shake-err {
             animation: shake 0.3s ease-in-out;
         }
+
+        .kiwi-peek {
+            position: absolute;
+            right: 2rem;
+            bottom: -5rem;
+            z-index: 10;
+            width: clamp(5rem, 15vw, 8rem);
+            height: auto;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .kiwi-peek.is-peeking {
+            animation: kiwi-peek 0.65s cubic-bezier(0.2, 0.8, 0.25, 1.2) both;
+        }
+
+        @keyframes kiwi-peek {
+            0% { opacity: 0; transform: translateY(65%) scale(0.8); }
+            65% { opacity: 1; transform: translateY(-8%) scale(1.05); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .kiwi-peek.is-peeking { animation: none; opacity: 1; }
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased transition-colors duration-300 select-none overflow-x-hidden flex flex-col justify-between">
@@ -170,7 +195,7 @@
         </div>
 
         <!-- Typing Main Card -->
-        <div id="typingCard" class="glass-panel p-6 sm:p-10 rounded-3xl relative overflow-hidden transition-all duration-200 border-2 border-slate-700/50 shadow-2xl">
+        <div id="typingCard" class="glass-panel p-6 sm:p-10 rounded-3xl relative overflow-visible transition-all duration-200 border-2 border-slate-700/50 shadow-2xl">
             <!-- Progress Bar -->
             <div class="w-full bg-slate-800/80 rounded-full h-1.5 mb-8 overflow-hidden">
                 <div id="progressBar" class="bg-gradient-to-r from-sky-400 to-indigo-500 h-1.5 rounded-full transition-all duration-300" style="width: 10%"></div>
@@ -216,6 +241,8 @@
                 <span id="questionCount">Question 1 / 10</span>
                 <span><i class="fa-solid fa-circle-info mr-1"></i>Esc キーでリセット</span>
             </div>
+
+            <img id="kiwiPeekImage" class="kiwi-peek" src="images/キュウイ.png" alt="" aria-hidden="true">
         </div>
 
         <!-- On-Screen Keyboard Visualizer (Optional/Interactive) -->
@@ -508,6 +535,7 @@
             initDOMElements() {
                 this.targetKanjiEl = document.getElementById("targetKanji");
                 this.targetKanaEl = document.getElementById("targetKana");
+                this.kiwiPeekImageEl = document.getElementById("kiwiPeekImage");
                 this.romajiDisplayEl = document.getElementById("romajiDisplay");
                 this.startPromptEl = document.getElementById("startPrompt");
                 this.startPromptContentEl = document.getElementById("startPromptContent");
@@ -589,6 +617,8 @@
                 const current = this.questions[this.currentIndex];
                 this.targetKanjiEl.textContent = current.kanji;
                 this.targetKanaEl.textContent = current.kana;
+                this.kiwiPeekImageEl.classList.remove("is-peeking");
+                if (this.isStarted) this.playKiwiPeek();
 
                 this.kanaNodes = parseKanaToRomajiNodes(current.kana);
                 this.nodeIndex = 0;
@@ -598,6 +628,12 @@
                 this.questionCountEl.textContent = `Question ${this.currentIndex + 1} / ${this.questions.length}`;
                 this.updateProgressBar();
                 this.renderRomajiDisplay();
+            }
+
+            playKiwiPeek() {
+                if (this.questions[this.currentIndex]?.kanji !== "キュウリ植えてもいいですか？") return;
+                void this.kiwiPeekImageEl.offsetWidth;
+                this.kiwiPeekImageEl.classList.add("is-peeking");
             }
 
             renderRomajiDisplay() {
@@ -702,6 +738,7 @@
                         this.isStarted = true;
                         this.startTime = Date.now();
                         this.startTimer();
+                        this.playKiwiPeek();
                     }, 300);
                 };
 
