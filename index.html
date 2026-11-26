@@ -105,6 +105,21 @@
             animation: kiwi-peek 0.65s cubic-bezier(0.2, 0.8, 0.25, 1.2) both;
         }
 
+        .spiki-peek.is-peeking {
+            animation: kiwi-peek 0.65s cubic-bezier(0.2, 0.8, 0.25, 1.2) both;
+        }
+
+        .spiki-peek.is-shaking {
+            opacity: 1;
+            animation: spiki-shake 0.1s linear infinite;
+        }
+
+        @keyframes spiki-shake {
+            0%, 100% { translate: 0 0; }
+            25% { translate: -2px 1px; }
+            75% { translate: 2px -1px; }
+        }
+
         @keyframes kiwi-peek {
             0% { opacity: 0; transform: translateY(65%) scale(0.8); }
             65% { opacity: 1; transform: translateY(-8%) scale(1.05); }
@@ -113,6 +128,11 @@
 
         @media (prefers-reduced-motion: reduce) {
             .kiwi-peek.is-peeking { animation: none; opacity: 1; }
+            .spiki-peek.is-peeking, .spiki-peek.is-shaking {
+                animation: none;
+                opacity: 1;
+                translate: none;
+            }
         }
     </style>
 </head>
@@ -243,6 +263,7 @@
             </div>
 
             <img id="kiwiPeekImage" class="kiwi-peek" src="images/キュウイ.png" alt="" aria-hidden="true">
+            <img id="spikiPeekImage" class="kiwi-peek spiki-peek" src="images/スピキ.png" alt="" aria-hidden="true">
         </div>
 
         <!-- On-Screen Keyboard Visualizer (Optional/Interactive) -->
@@ -536,6 +557,12 @@
                 this.targetKanjiEl = document.getElementById("targetKanji");
                 this.targetKanaEl = document.getElementById("targetKana");
                 this.kiwiPeekImageEl = document.getElementById("kiwiPeekImage");
+                this.spikiPeekImageEl = document.getElementById("spikiPeekImage");
+                this.spikiPeekImageEl.addEventListener("animationend", (event) => {
+                    if (event.animationName !== "kiwi-peek") return;
+                    this.spikiPeekImageEl.classList.remove("is-peeking");
+                    this.spikiPeekImageEl.classList.add("is-shaking");
+                });
                 this.romajiDisplayEl = document.getElementById("romajiDisplay");
                 this.startPromptEl = document.getElementById("startPrompt");
                 this.startPromptContentEl = document.getElementById("startPromptContent");
@@ -618,7 +645,11 @@
                 this.targetKanjiEl.textContent = current.kanji;
                 this.targetKanaEl.textContent = current.kana;
                 this.kiwiPeekImageEl.classList.remove("is-peeking");
-                if (this.isStarted) this.playKiwiPeek();
+                this.spikiPeekImageEl.classList.remove("is-peeking", "is-shaking");
+                if (this.isStarted) {
+                    this.playKiwiPeek();
+                    this.playSpikiPeek();
+                }
 
                 this.kanaNodes = parseKanaToRomajiNodes(current.kana);
                 this.nodeIndex = 0;
@@ -634,6 +665,12 @@
                 if (this.questions[this.currentIndex]?.kanji !== "キュウリ植えてもいいですか？") return;
                 void this.kiwiPeekImageEl.offsetWidth;
                 this.kiwiPeekImageEl.classList.add("is-peeking");
+            }
+
+            playSpikiPeek() {
+                if (this.questions[this.currentIndex]?.kanji !== "ｳﾜｱｱｱｱ!ｽﾋﾟｷﾓﾘﾁｬﾊﾞﾀﾞﾝｷﾞｼﾞﾏｾﾖ!ﾈﾙﾇﾆﾛｯｹﾎﾟﾝﾆｮｸﾁｮｷﾞﾝﾖｯｶﾘｱﾆﾗﾝﾏﾘｴﾖ～～!!") return;
+                void this.spikiPeekImageEl.offsetWidth;
+                this.spikiPeekImageEl.classList.add("is-peeking");
             }
 
             renderRomajiDisplay() {
@@ -739,6 +776,7 @@
                         this.startTime = Date.now();
                         this.startTimer();
                         this.playKiwiPeek();
+                        this.playSpikiPeek();
                     }, 300);
                 };
 
